@@ -2,6 +2,8 @@
 In this file, you will implement generic search algorithms which are called by Pacman agents.
 """
 from pacai.util.stack import Stack
+from pacai.util.queue import Queue
+from pacai.util.priorityQueue import PriorityQueue
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first [p 85].
@@ -21,14 +23,12 @@ def depthFirstSearch(problem):
     # *** Your Code Here ***
     stack = Stack()
     visited = list()
-    actions = list()
     parent = {}
     for travel in problem.successorStates(problem.startingState()):
         stack.push(travel)
 
     while not stack.isEmpty():
         vertex = stack.pop()
-        print(problem.isGoal(vertex[0]))
         if problem.isGoal(vertex[0]):
             path = list()
             while vertex is not None:
@@ -40,7 +40,6 @@ def depthFirstSearch(problem):
             visited.append(vertex)
             for travel in problem.successorStates(vertex[0]):
                 if travel not in visited:
-                    print("%s" % (str(travel)))
                     stack.push(travel)
                     parent[travel] = vertex
 
@@ -53,16 +52,48 @@ def breadthFirstSearch(problem):
     Search the shallowest nodes in the search tree first. [p 81]
     """
 
-    # *** Your Code Here ***
-    raise NotImplementedError()
+    queue = Queue()
+    visited = list()
+    parent = {}
 
+    for travel in problem.successorStates(problem.startingState()):
+        queue.push(travel)
+
+    while not queue.isEmpty():
+        node = queue.pop()
+        if problem.isGoal(node[0]):
+            path = list()
+            while node is not None:
+                path.append(node[1])
+                node = parent.get(node)
+            
+            return path[::-1]
+
+        if node not in visited:
+            visited.append(node)
+            for neighbor in problem.successorStates(node[0]):
+                if neighbor not in visited:
+                    queue.push(neighbor)
+                    parent[neighbor] = node
+
+    return None
 def uniformCostSearch(problem):
     """
     Search the node of least total cost first.
     """
 
     # *** Your Code Here ***
-    raise NotImplementedError()
+
+    pq = PriorityQueue()
+    visited = list()
+
+    for travel in problem.successorStates(problem.startingState()):
+        pq.push(travel, travel[2])
+
+    while not pq.isEmpty():
+        node = pq.pop()
+        
+
 
 def aStarSearch(problem, heuristic):
     """
