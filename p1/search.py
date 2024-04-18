@@ -3,6 +3,7 @@ In this file, you will implement generic search algorithms which are called by P
 """
 from pacai.util.stack import Stack
 from pacai.util.queue import Queue
+from pacai.util.priorityQueue import PriorityQueueWithFunction
 from pacai.util.priorityQueue import PriorityQueue
 def depthFirstSearch(problem):
     """
@@ -22,22 +23,22 @@ def depthFirstSearch(problem):
 
     # *** Your Code Here ***
     stack = Stack()
-    visited = list()
-    parent = {}
+    visited = set()
+    parent = {} # Using parent dict as a way to traverse from start to finish
     for travel in problem.successorStates(problem.startingState()):
         stack.push(travel)
 
     while not stack.isEmpty():
         vertex = stack.pop()
         if problem.isGoal(vertex[0]):
-            path = list()
+            path = list() # Create path list from beginning to end
             while vertex is not None:
                 path.append(vertex[1])
                 vertex = parent.get(vertex)
 
             return path[::-1]
         if vertex not in visited:
-            visited.append(vertex)
+            visited.add(vertex)
             for travel in problem.successorStates(vertex[0]):
                 if travel not in visited:
                     stack.push(travel)
@@ -54,27 +55,22 @@ def breadthFirstSearch(problem):
 
     queue = Queue()
     visited = list()
-    parent = {}
-
-    for travel in problem.successorStates(problem.startingState()):
-        queue.push(travel)
+    visited.append(problem.startingState())
+    queue.push(((problem.startingState(), [], 1)))
 
     while not queue.isEmpty():
-        node = queue.pop()
-        if problem.isGoal(node[0]):
-            path = list()
-            while node is not None:
-                path.append(node[1])
-                node = parent.get(node)
-            
-            return path[::-1]
+        node, path, cost = queue.pop()
+        print(node)
+        if problem.isGoal(node):
+            return path
+        
+        visited.append(node)
+        for neighbor in problem.successorStates(node):
+            if neighbor[0] not in visited:
+                copy_list = path.copy()
+                copy_list.append(neighbor[1])
+                queue.push((neighbor[0], copy_list, cost)) #Grabbing current node cost and neighbor cost for traveling
 
-        if node not in visited:
-            visited.append(node)
-            for neighbor in problem.successorStates(node[0]):
-                if neighbor not in visited:
-                    queue.push(neighbor)
-                    parent[neighbor] = node
 
     return None
 def uniformCostSearch(problem):
@@ -84,14 +80,28 @@ def uniformCostSearch(problem):
 
     # *** Your Code Here ***
 
-    pq = PriorityQueue()
-    visited = list()
-
-    for travel in problem.successorStates(problem.startingState()):
-        pq.push(travel, travel[2])
+    pq = PriorityQueueWithFunction(lambda item: item[2])
+    visited = set()
+    cost = 0
+    pq.push((problem.startingState(), [], cost))
+    visited.add(problem.startingState())
 
     while not pq.isEmpty():
-        node = pq.pop()
+        node, path, curr_cost = pq.pop()[1]
+        if problem.isGoal(node):
+            return path
+
+        visited.add(node)
+        for neighbor in problem.successorStates(node):
+            print(neighbor)
+            if neighbor[0] not in visited:
+                copy_list = path.copy()
+                copy_list.append(neighbor[1])
+                next_cost = curr_cost + cost
+                pq.push((neighbor[0], copy_list, next_cost)) #Grabbing current node cost and neighbor cost for traveling
+    
+    return None   
+        
         
 
 
@@ -101,4 +111,29 @@ def aStarSearch(problem, heuristic):
     """
 
     # *** Your Code Here ***
-    raise NotImplementedError()
+
+    pq = PriorityQueue()
+    visited = list()
+    parent = {}
+    for travel in problem.successorStates(problem.startingState()):
+        pq.push(travel, travel[2])
+
+    while not pq.isEmpty():
+        node = pq.pop()
+        if problem.isGoal(node[0]):
+            path = list()
+            while node is not None:
+                path.append(node[1])
+                node = parent.get(node)
+
+            return path[::-1]
+        
+        if node not in visited:
+            visited.append(node)
+            for neighbor in problem.successorStates(node[0]):
+                if neighbor not in visited:
+                     #Grabbing current node cost and neighbor cost for traveling
+                    parent[neighbor] = node
+                    pq.push(neighbor, neighbor[2] + node[2] + heuristic(neighbor[0], problem))
+    
+    return None

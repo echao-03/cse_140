@@ -13,6 +13,7 @@ from pacai.core.search.position import PositionSearchProblem
 from pacai.core.search.problem import SearchProblem
 from pacai.agents.base import BaseAgent
 from pacai.agents.search.base import SearchAgent
+from pacai.core.directions import Directions
 
 class CornersProblem(SearchProblem):
     """
@@ -64,7 +65,57 @@ class CornersProblem(SearchProblem):
                 logging.warning('Warning: no food in corner ' + str(corner))
 
         # *** Your Code Here ***
-        raise NotImplementedError()
+        self.cornersVisited = []
+
+    def isGoal(self, state):
+        coords, corners = state
+        if (coords not in self.corners):
+            return False
+        else:
+            return sorted(corners) == sorted(self.corners)
+        
+    def startingState(self):
+        return (self.startingPosition, self.cornersVisited)
+    
+    def successorStates(self, state):
+
+        #Find shortest path around the maze
+        # State representation = Encodes all info regarding 
+        #Check actions in directions
+
+        successors = []
+        
+        # Make list of 0's (?) 
+        # copy cooredniate list, 
+        for action in Directions.CARDINAL:
+            curr_pos, visitedCorners = state
+            x, y = curr_pos
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+
+            # coornidate list with nextx and nexty
+            if not hitsWall:
+
+                # check if tthe move is in self.corners
+                    #construct child, copy corner list into dupe
+                    #remove 
+                    # 
+                next_node = (nextx, nexty)
+                if next_node in self.corners:
+                    tempCorners = visitedCorners.copy()
+                    if next_node not in visitedCorners:
+                        tempCorners.append(next_node)
+                        next_state = (next_node, tempCorners)
+                        successors.append((next_state, action, 1))
+                        continue
+
+                next_state = (next_node, visitedCorners)
+                successors.append((next_state, action, 1))
+        
+        self._numExpanded += 1
+        return successors
+    
 
     def actionsCost(self, actions):
         """
