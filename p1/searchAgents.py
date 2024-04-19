@@ -65,14 +65,14 @@ class CornersProblem(SearchProblem):
                 logging.warning('Warning: no food in corner ' + str(corner))
 
         # *** Your Code Here ***
-        self.cornersVisited = []
+        self.cornersVisited = {0, 0, 0, 0}
 
     def isGoal(self, state):
         coords, corners = state
         if (coords not in self.corners):
             return False
         else:
-            return sorted(corners) == sorted(self.corners)
+            return len(corners) == {1, 1, 1, 1}
         
     def startingState(self):
         return (self.startingPosition, self.cornersVisited)
@@ -85,8 +85,7 @@ class CornersProblem(SearchProblem):
 
         successors = []
         
-        # Make list of 0's (?) 
-        # copy cooredniate list, 
+        # copy coordinate list, 
         for action in Directions.CARDINAL:
             curr_pos, visitedCorners = state
             x, y = curr_pos
@@ -102,18 +101,24 @@ class CornersProblem(SearchProblem):
                     #remove 
                     # 
                 next_node = (nextx, nexty)
+                tempCorners = visitedCorners.copy()
                 if next_node in self.corners:
-                    tempCorners = visitedCorners.copy()
                     if next_node not in visitedCorners:
-                        tempCorners.append(next_node)
-                        next_state = (next_node, tempCorners)
-                        successors.append((next_state, action, 1))
-                        continue
+                            for i in range(len(self.corners)):
+                                if next_node == self.corners[i] and not visitedCorners[i]:
+                                    tempCorners[i] = 1
 
-                next_state = (next_node, visitedCorners)
+                    
+                next_state = (next_node, tempCorners)
                 successors.append((next_state, action, 1))
-        
+
+                
         self._numExpanded += 1
+
+        if state[0] not in self._visitedLocations:
+            self._visitedLocations.add(state[0])
+            self._visitHistory.append(state[0])
+
         return successors
     
 

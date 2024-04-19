@@ -65,10 +65,11 @@ def breadthFirstSearch(problem):
         
         for neighbor in problem.successorStates(node):
             if neighbor[0] not in visited:
+                
+                visited.append(neighbor[0])
                 copy_list = path.copy()
                 copy_list.append(neighbor[1])
                 queue.push((neighbor[0], copy_list, cost)) #Grabbing current node cost and neighbor cost for traveling
-                visited.append(neighbor[0])
 
 
     return None
@@ -83,12 +84,11 @@ def uniformCostSearch(problem):
 
     pq = PriorityQueueWithFunction(lambda item: item[2])
     visited = set()
-    cost = 0
-    pq.push((problem.startingState(), [], cost))
+    pq.push((problem.startingState(), [], 0))
     visited.add(problem.startingState())
 
     while not pq.isEmpty():
-        node, path, curr_cost = pq.pop()[1]
+        node, path, curr_cost = pq.pop()
         if problem.isGoal(node):
             return path
 
@@ -97,8 +97,7 @@ def uniformCostSearch(problem):
             if neighbor[0] not in visited:
                 copy_list = path.copy()
                 copy_list.append(neighbor[1])
-                next_cost = curr_cost + cost
-                pq.push((neighbor[0], copy_list, next_cost)) #Grabbing current node cost and neighbor cost for traveling
+                pq.push((neighbor[0], copy_list, curr_cost + neighbor[2])) #Grabbing current node cost and neighbor cost for traveling
                 visited.add(neighbor[0])
 
     return None   
@@ -113,22 +112,27 @@ def aStarSearch(problem, heuristic):
 
     # *** Your Code Here ***
 
-    pq = PriorityQueueWithFunction(lambda item: item[2])
-    visited = set()
-    cost = 0
-    pq.push((problem.startingState(), [], cost))
-    visited.add(problem.startingState())
+    pq = PriorityQueue()
+    visited = list()
+    start_heuristic = heuristic(problem.startingState(), problem)
+    pq.push(((problem.startingState(), None, 0), [], 0, start_heuristic), start_heuristic)
+    print(problem.startingState())
+    visited.append(problem.startingState())
 
     while not pq.isEmpty():
-        node, path, curr_cost = pq.pop()[1]
-        if problem.isGoal(node):
+        node, path, __, __ = pq.pop()
+        if problem.isGoal(node[0]):
+
             return path
         
-        if node not in visited:
-            visited.append(node)
-            for neighbor in problem.successorStates(node[0]):
-                if neighbor not in visited:
-                     #Grabbing current node cost and neighbor cost for traveling
-                    pq.push(neighbor, neighbor[2] + node[2] + heuristic(neighbor[0], problem))
+        for neighbor in problem.successorStates(node[0]):
+            new_heuristic = heuristic(neighbor[0], problem)
+            if neighbor[0] not in visited:
+                #Grabbing current node cost and neighbor cost for traveling
+                visited.append(neighbor[0])
+                new_path = path.copy()
+                new_path.append(neighbor[1])
+                path_cost = problem.actionsCost(new_path)
+                pq.push((neighbor, new_path, path_cost, new_heuristic), path_cost + new_heuristic)
     
     return None
