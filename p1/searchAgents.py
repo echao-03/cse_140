@@ -65,17 +65,17 @@ class CornersProblem(SearchProblem):
                 logging.warning('Warning: no food in corner ' + str(corner))
 
         # *** Your Code Here ***
-        self.cornersVisited = {0, 0, 0, 0}
+        self.startState = (self.startingPosition, [False, False, False, False])
 
     def isGoal(self, state):
         coords, corners = state
         if (coords not in self.corners):
             return False
         else:
-            return len(corners) == {1, 1, 1, 1}
+            return all(corners) is True
         
     def startingState(self):
-        return (self.startingPosition, self.cornersVisited)
+        return self.startState
     
     def successorStates(self, state):
 
@@ -94,23 +94,22 @@ class CornersProblem(SearchProblem):
             hitsWall = self.walls[nextx][nexty]
 
             # coornidate list with nextx and nexty
-            if not hitsWall:
 
                 # check if tthe move is in self.corners
                     #construct child, copy corner list into dupe
                     #remove 
                     # 
-                next_node = (nextx, nexty)
-                tempCorners = visitedCorners.copy()
-                if next_node in self.corners:
-                    if next_node not in visitedCorners:
-                            for i in range(len(self.corners)):
-                                if next_node == self.corners[i] and not visitedCorners[i]:
-                                    tempCorners[i] = 1
+            if (not hitsWall):  # Construct the successor.
+                    next_node = (nextx, nexty)  # For the successor we need a new position
+                    tempCorners = visitedCorners.copy()
+                    if (next_node in self.corners):  # If we are in a corner
+                        for i in range(len(self.corners)):
+                            if next_node == self.corners[i] and not visitedCorners[i]:
+                                tempCorners[i] = True
+                    next_state = (next_node, tempCorners)
+                    successors.append((next_state, action, 1))
 
-                    
-                next_state = (next_node, tempCorners)
-                successors.append((next_state, action, 1))
+            
 
                 
         self._numExpanded += 1
