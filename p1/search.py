@@ -116,11 +116,13 @@ def aStarSearch(problem, heuristic):
     visited = list()
     start_heuristic = heuristic(problem.startingState(), problem)
     pq.push(((problem.startingState(), None, 0), [], 0, start_heuristic), start_heuristic)
-    print(problem.startingState())
     visited.append(problem.startingState())
 
     while not pq.isEmpty():
-        node, path, __, __ = pq.pop()
+
+        state = pq.pop()
+        node, path, __, __ = state[1]
+
         if problem.isGoal(node[0]):
 
             return path

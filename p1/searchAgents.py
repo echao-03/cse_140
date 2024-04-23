@@ -9,11 +9,13 @@ import logging
 
 from pacai.core.actions import Actions
 from pacai.core.search import heuristic
+from pacai.core import distance
 from pacai.core.search.position import PositionSearchProblem
 from pacai.core.search.problem import SearchProblem
 from pacai.agents.base import BaseAgent
 from pacai.agents.search.base import SearchAgent
 from pacai.core.directions import Directions
+
 
 class CornersProblem(SearchProblem):
     """
@@ -155,7 +157,18 @@ def cornersHeuristic(state, problem):
     # walls = problem.walls  # These are the walls of the maze, as a Grid.
 
     # *** Your Code Here ***
-    return heuristic.null(state, problem)  # Default to trivial solution
+
+    pos, visitedCorners = state
+    
+    heuristic_val = 0
+
+    for index, corner in enumerate(problem.corners):
+        if visitedCorners[index] == False:
+            distanceToCorner = distance.manhattan(pos, corner)
+            heuristic_val += distanceToCorner
+    
+    return heuristic_val
+
 
 def foodHeuristic(state, problem):
     """
