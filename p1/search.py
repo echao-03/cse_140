@@ -121,7 +121,8 @@ def aStarSearch(problem, heuristic):
     while not pq.isEmpty():
 
         state = pq.pop()
-        node, path, __, __ = state[1]
+        print(state)
+        node, path, __, __ = state
 
         if problem.isGoal(node[0]):
 

@@ -160,14 +160,18 @@ def cornersHeuristic(state, problem):
 
     pos, visitedCorners = state
     
-    heuristic_val = 0
+    # heuristic_val = 0
+
+    unvisitedDistances = []
 
     for index, corner in enumerate(problem.corners):
         if visitedCorners[index] == False:
-            distanceToCorner = distance.manhattan(pos, corner)
-            heuristic_val += distanceToCorner
+            unvisitedDistances.append(distance.manhattan(pos, corner))
+
+    if not unvisitedDistances:
+        return 0
     
-    return heuristic_val
+    return min(unvisitedDistances)
 
 
 def foodHeuristic(state, problem):
@@ -200,9 +204,18 @@ def foodHeuristic(state, problem):
     """
 
     position, foodGrid = state
-
     # *** Your Code Here ***
-    return heuristic.null(state, problem)  # Default to the null heuristic.
+    heuristic = 0
+    foodPositions = foodGrid.asList()
+
+    if not foodPositions:
+        return 0
+    
+
+    nearestFoodDistance = min(distance.manhattan(position, foodPosition) for foodPosition in foodPositions)
+
+
+    return nearestFoodDistance
 
 class ClosestDotSearchAgent(SearchAgent):
     """
