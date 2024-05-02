@@ -24,14 +24,14 @@ def depthFirstSearch(problem):
     # *** Your Code Here ***
     stack = Stack()
     visited = set()
-    parent = {} # Using parent dict as a way to traverse from start to finish
+    parent = {}
     for travel in problem.successorStates(problem.startingState()):
         stack.push(travel)
 
     while not stack.isEmpty():
         vertex = stack.pop()
         if problem.isGoal(vertex[0]):
-            path = list() # Create path list from beginning to end
+            path = list()
             while vertex is not None:
                 path.append(vertex[1])
                 vertex = parent.get(vertex)
@@ -43,8 +43,6 @@ def depthFirstSearch(problem):
                 if travel not in visited:
                     stack.push(travel)
                     parent[travel] = vertex
-
-
 
     return None
 
@@ -59,21 +57,20 @@ def breadthFirstSearch(problem):
     queue.push(((problem.startingState(), [], 1)))
 
     while not queue.isEmpty():
+        
         node, path, cost = queue.pop()
         if problem.isGoal(node):
             return path
         
         for neighbor in problem.successorStates(node):
             if neighbor[0] not in visited:
-                
+
                 visited.append(neighbor[0])
                 copy_list = path.copy()
                 copy_list.append(neighbor[1])
-                queue.push((neighbor[0], copy_list, cost)) #Grabbing current node cost and neighbor cost for traveling
-
+                queue.push((neighbor[0], copy_list, cost))
 
     return None
-
 
 def uniformCostSearch(problem):
     """
@@ -97,13 +94,10 @@ def uniformCostSearch(problem):
             if neighbor[0] not in visited:
                 copy_list = path.copy()
                 copy_list.append(neighbor[1])
-                pq.push((neighbor[0], copy_list, curr_cost + neighbor[2])) #Grabbing current node cost and neighbor cost for traveling
+                pq.push((neighbor[0], copy_list, curr_cost + neighbor[2]))
                 visited.add(neighbor[0])
 
-    return None   
-        
-        
-
+    return None
 
 def aStarSearch(problem, heuristic):
     """
@@ -119,19 +113,14 @@ def aStarSearch(problem, heuristic):
     visited.append(problem.startingState())
 
     while not pq.isEmpty():
-
         state = pq.pop()
-        print(state)
         node, path, __, __ = state
-
         if problem.isGoal(node[0]):
-
             return path
         
         for neighbor in problem.successorStates(node[0]):
             new_heuristic = heuristic(neighbor[0], problem)
             if neighbor[0] not in visited:
-                #Grabbing current node cost and neighbor cost for traveling
                 visited.append(neighbor[0])
                 new_path = path.copy()
                 new_path.append(neighbor[1])
