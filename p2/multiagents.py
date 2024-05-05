@@ -51,7 +51,6 @@ class ReflexAgent(BaseAgent):
 
         successorGameState = currentGameState.generatePacmanSuccessor(action)
 
-<<<<<<< HEAD
         newPosition = successorGameState.getPacmanPosition()
         # oldPosition = currentGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
@@ -98,36 +97,6 @@ class ReflexAgent(BaseAgent):
             return newScore + curr_food[0]
         
 
-=======
-        # Useful information you can extract.
-        newPosition = successorGameState.getPacmanPosition()
-        oldFood = currentGameState.getFood()
-        newFood = successorGameState.getFood()
-        newGhostStates = successorGameState.getGhostStates()
-
-        # *** Your Code Here ***
-        for ghost in newGhostStates:
-            ghostPos = ghost.getPosition()
-            
-            if ghost.isBraveGhost():
-                if distance.manhattan(newPosition, ghostPos) < 2:
-                    return -999
-            
-        distance_food = []
-        foodLocation = newFood.asList()
-        for food in foodLocation:
-            distance_food.append(1/ distance.manhattan(newPosition, food))
-        
-        
-        distance_food.sort()   
-        if oldFood.count() != newFood.count():
-            if newFood.count() == 0:
-                return 0
-            return successorGameState.getScore() + distance_food[0]
-        
-        else:
-            return distance_food[-1] - abs(successorGameState.getScore())
->>>>>>> f54075a5d05c49b15a927b34ab0a4367f741b282
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -159,7 +128,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
     def __init__(self, index, **kwargs):
         super().__init__(index, **kwargs)
 
-<<<<<<< HEAD
     
     def getAction(self, gameState):
 
@@ -202,8 +170,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
     
 
 
-=======
->>>>>>> f54075a5d05c49b15a927b34ab0a4367f741b282
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     A minimax agent with alpha-beta pruning.
