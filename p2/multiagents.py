@@ -57,7 +57,7 @@ class ReflexAgent(BaseAgent):
         # oldPosition = currentGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
         oldFood = currentGameState.getFood()
-        old_food_ct = oldFood.count()
+        # old_food_ct = oldFood.count()
         new_food_ct = newFood.count()
         # oldScore = currentGameState.getScore()
         newScore = successorGameState.getScore()
@@ -98,8 +98,6 @@ class ReflexAgent(BaseAgent):
                 return 0
             return newScore + curr_food[0]
         
-
-
 class MinimaxAgent(MultiAgentSearchAgent):
     """
     A minimax agent.
@@ -153,14 +151,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
             else:
                 return self.maxValue(gameState, depth, index)
                 
-                
     def terminalState(self, gameState, depth):
         if ((gameState.isWin() or gameState.isLose()) or depth == self.getTreeDepth()):
-                return self.getEvaluationFunction()(gameState)
-        
-        
-                
-
+            return self.getEvaluationFunction()(gameState)
+    
     def minValue(self, gameState, depth, index):
         numActions = gameState.getLegalActions(index)
         minValue = float('inf')
@@ -175,7 +169,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 else:
                     minValue = min(minValue, self.value(newSuccessor, depth, index + 1))
             
-            return minValue 
+            return minValue
         
     def maxValue(self, gameState, depth, index):
         numActions = gameState.getLegalActions(index)
@@ -209,7 +203,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         
     def terminalState(self, gameState, depth):
         if ((gameState.isWin() or gameState.isLose()) or depth == self.getTreeDepth()):
-                return self.getEvaluationFunction()(gameState)
+            return self.getEvaluationFunction()(gameState)
             
     def value(self, gameState, alpha, beta, depth, index):
         if self.terminalState(gameState, depth):
@@ -247,7 +241,12 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             for action in numActions:
                 newSuccessor = gameState.generateSuccessor(index, action)
                 if index + 1 != numAgents:
-                    minValue = min(minValue, self.value(newSuccessor, alpha, beta, depth, index + 1))
+                    # Too many characters on line, need to condense
+                    a = alpha
+                    b = beta
+                    d = depth
+                    i = index
+                    minValue = min(minValue, self.value(newSuccessor, a, b, d, i + 1))
                 else:
                     minValue = min(minValue, self.value(newSuccessor, alpha, beta, depth + 1, 0))
                     
@@ -256,7 +255,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 else:
                     beta = min(beta, minValue)
             return minValue
-        
         
     def getAction(self, gameState):
         returnedAction = None
@@ -290,15 +288,116 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
     def __init__(self, index, **kwargs):
         super().__init__(index, **kwargs)
+        
+    def value(self, gameState, depth, index):
+        if index == gameState.getNumAgents() - 1:
+            return self.maxValue(gameState, depth + 1, 0)
+        else:
+            return self.expValue(gameState, depth, index + 1)
+        
+    def expValue(self, gameState, depth, index):
+        values = []
+        
+        if len(gameState.getLegalActions(index)) == 0 or depth == self.getTreeDepth():
+            return self.getEvaluationFunction()(gameState)
+        
+        for action in gameState.getLegalActions(index):
+            newSuccessor = gameState.generateSuccessor(index, action)
+            values.append(self.value(newSuccessor, depth, index))
+            
+        total_sum = 0
+        for num in values:
+            total_sum += num
+            
+        return total_sum / len(gameState.getLegalActions(index))
+    
+    def maxValue(self, gameState, depth, index):
+        value = float('-inf')
+        
+        if len(gameState.getLegalActions(index)) == 0 or depth == self.getTreeDepth():
+            return self.getEvaluationFunction()(gameState)
+           
+        for action in gameState.getLegalActions(index):
+            newSuccessor = gameState.generateSuccessor(index, action)
+            newVal = self.value(newSuccessor, depth, index)
+            
+            if newVal > value:
+                value = newVal
+                
+        return value
+    
+    def getAction(self, gameState):
+        retVal = None
+        maxVal = float('-inf')
+        
+        for action in gameState.getLegalActions(0):
+            newSuccessor = gameState.generateSuccessor(0, action)
+            newScore = self.value(newSuccessor, 0, 0)
+            
+            if newScore > maxVal:
+                maxVal = newScore
+                retVal = action
+                
+            return retVal
 
 def betterEvaluationFunction(currentGameState):
     """
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable evaluation function.
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION:
+    Using inspiration from Q1, I grab the necessary variables I need ie. PacMan's Position,
+    Ghost's positions, capsule, etc. I use manhattan distance to obtain distance of ghosts
+    to Pacman. If ghosts are < 2 spaces from PacMan, then PacMan runs away.
     """
+    # Scores for Game
+    regScore = 0
+    ghostScore = 0
+    capsuleScore = 0
+    
+    # Getting positions of all attributes
+    foodGrid = currentGameState.getFood()
+    foodList = foodGrid.asList()
+    currentPacman = currentGameState.getPacmanPosition()
+    currentGhost = currentGameState.getGhostStates()
+    capsules_list = currentGameState.getCapsules()
+    scaredTimes = []
+    for ghostState in currentGhost:
+        scaredTimes.append(ghostState.getScaredTimer())
 
-    return currentGameState.getScore()
+    # Checking ghost states and use state for PacMan
+    if currentGhost:
+        ghostDist = float('inf')
+        for ghost in currentGhost:
+            if ghostDist > distance.manhattan(currentPacman, ghost.getPosition()):
+                ghostDist = distance.manhattan(currentPacman, ghost.getPosition())
+        
+        if ghostDist <= 2:
+            ghostScore = -999
+        else:
+            if min(scaredTimes) > 0:
+                ghostScore = 1 / (ghostDist + 0.01)
+                
+    if foodList:
+        foodDist = float('inf')
+        for food in foodList:
+            if foodDist > distance.manhattan(currentPacman, food):
+                foodDist = distance.manhattan(currentPacman, food)
+        
+        if foodDist > 0:
+            regScore = 1 / (foodDist + 0.01)
+        else:
+            regScore = 0
+            
+    if capsules_list:
+        capsuleDist = float('inf')
+        for capsule in capsules_list:
+            if capsuleDist < distance.manhattan(currentPacman, capsule):
+                capsuleDist = distance.manhattan(currentPacman, capsule)
+        
+        if capsuleDist <= 1:
+            capsuleScore = 1000
+            
+    return currentGameState.getScore() + regScore + ghostScore + capsuleScore
 
 class ContestAgent(MultiAgentSearchAgent):
     """
