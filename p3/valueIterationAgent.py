@@ -52,14 +52,11 @@ class ValueIterationAgent(ValueEstimationAgent):
                     current_values[state] = maxVal
                     
             self.values = current_values
-            
-            
 
     def getValue(self, state):
         """
         Return the value of the state (computed in __init__).
         """
-
         return self.values.get(state, 0.0)
 
     def getAction(self, state):
